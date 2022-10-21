@@ -1,5 +1,5 @@
 {
-	"name": "unicorn-fun-cli",
+	"name": "pes-edit-to-db",
 	"version": "0.0.0",
 	"description": "My awesome command-line tool",
 	"license": "MIT",
@@ -14,7 +14,7 @@
 		"unicorn-fun": "cli.js"
 	},
 	"engines": {
-		"node": ">=12"
+		"node": ">=16"
 	},
 	"scripts": {
 		"test": "xo && ava"
@@ -29,7 +29,10 @@
 		"fun"
 	],
 	"dependencies": {
+		"bitten": "^0.0.0-experimental-7b438c5d9-20220316",
+		"command-line-args": "^5.2.1",
 		"meow": "^9.0.0",
+		"mkdirp": "^1.0.4",
 		"unicorn-fun": "^0.0.0"
 	},
 	"devDependencies": {
