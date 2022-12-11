@@ -17,6 +17,7 @@
 		"node": ">=16"
 	},
 	"scripts": {
+		"deno:run": "deno run --allow-read --allow-run --allow-write ./cli.ts",
 		"test": "xo && ava"
 	},
 	"files": [

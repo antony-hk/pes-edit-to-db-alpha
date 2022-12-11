@@ -2,8 +2,8 @@ import fs from 'fs';
 import * as Bitten from 'bitten';
 
 import relativePath from './relativePath.mjs';
-// import isZlibbed from 'pes-ted/bin/utils/wesys-zlib/isZlibbed.mjs';
-// import unzlib from 'pes-ted/bin/utils/wesys-zlib/unzlib.mjs';
+import isZlibbed from './wesys-zlib/isZlibbed.mjs';
+import unzlib from './wesys-zlib/unzlib.mjs';
 
 export default function loadData(dbFilePath, Format, isBigEndian = false) {
     console.log(`Load data: ${dbFilePath}`);
@@ -13,7 +13,7 @@ export default function loadData(dbFilePath, Format, isBigEndian = false) {
         buf = unzlib(buf);
     }
 
-    const rawResult = bin2obj(
+    const rawResult = Bitten.toJS(
         buf,
         Format.recordLength,
         Format.format,
@@ -34,7 +34,7 @@ export default function loadData(dbFilePath, Format, isBigEndian = false) {
         //     }
         // }
     }
-    const writeBackResult = obj2bin(result, Format.recordLength, Format.format, isBigEndian);
+    const writeBackResult = Bitten.fromJS(result, Format.recordLength, Format.format, isBigEndian);
 
     if (Format.isFullyCovered && buf.compare(writeBackResult) !== 0) {
         console.warn('Warning: Format is not fully covered.');

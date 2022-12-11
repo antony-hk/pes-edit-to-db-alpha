@@ -1,9 +1,12 @@
-// import childProcess from 'child_process';
+import childProcess from 'child_process';
 // import commandLineArgs from 'command-line-args';
 import fs from 'fs';
 import mkdirp from 'mkdirp';
 
 import * as SpecEditData2021PC from './spec/pes2021/edit/EditDataPC.mjs';
+// import * as DbPlayerFormat from './spec/pes2021/pesdb/Player.mjs';
+import * as DbTacticsFormat from './spec/pes2021/pesdb/Tactics.mjs';
+import * as DbTacticsFormationFormat from './spec/pes2021/pesdb/TacticsFormation.mjs';
 import loadData from './utils/loadData.mjs';
 import relativePath from './utils/relativePath.mjs';
 
@@ -13,12 +16,18 @@ import relativePath from './utils/relativePath.mjs';
 //     { name: 'output', alias: 'o', type: String },
 // ];
 
-// const pesXdecrypterPath = relativePath('./lib/pesXdecrypter_2021/decrypter21.exe');
+const pesXdecrypterPath = relativePath('./lib/pesXdecrypter_2021/decrypter21.exe');
 const tempEncryptedEditFilePath = relativePath('./temp/EDIT00000000');
 const tempDecryptedEditDirPath = relativePath('./temp/EDIT00000000_decrypt');
 
-export default function main(
-    editFilePath = relativePath('./sample_input/EDIT00000000'),
+async function temp(editedTactics, { tacticses, tacticsFormations }) {
+    return {
+        tacticses, tacticsFormations
+    };
+}
+
+export default async function main(
+    editFilePath = relativePath('./input/EDIT00000000'),
     baseDbPath,
     outputDbPath
 ) {
@@ -30,12 +39,23 @@ export default function main(
     childProcess.execSync(`"${pesXdecrypterPath}" "${tempEncryptedEditFilePath}" "${tempDecryptedEditDirPath}"`);
 
     const editDataPath = `${tempDecryptedEditDirPath}/data.dat`;
-    const result = loadData(editDataPath, SpecEditData2021PC);
     const {
-        players: editPlayers
-    } = loadData(editDataPath, SpecEditData2021PC);
+        players: editedPlayers,
+        tactics: editedTactics,
+        // ...others
+    } = loadData(editDataPath, SpecEditData2021PC)[0];
 
-    console.log(result);
+    // console.log(editedPlayers);
+    // console.log(Object.keys(others));
+
+    // const players = loadData(relativePath('./input/pesdb/Player.bin'), );
+    const tacticses = loadData(relativePath('./input/pesdb/Tactics.bin'), DbTacticsFormat);
+    const tacticsFormations = loadData(relativePath('./input/pesdb/TacticsFormation.bin'), DbTacticsFormationFormat);
+
+    console.log(tacticses);
+    let result;
+
+    result = await temp(editedTactics, { tacticses, tacticsFormations });
 }
 
 // (async function main() {

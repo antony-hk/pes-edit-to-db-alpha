@@ -1,6 +1,6 @@
 import {
     offByOneFunc,
-} from '../../../pes2020/format/common-utils.mjs';
+} from '../../common.mjs';
 
 export const isFullyCovered = true;
 
