@@ -151,6 +151,7 @@ const playingStyleFunc: DataGetAndSet<TPlayingStyle, TPlayingStyleKey> = {
 };
 
 export const recordLength = 0x138;
+export const isFullyCovered = true;
 
 export const format: Format = [
     // 0x00

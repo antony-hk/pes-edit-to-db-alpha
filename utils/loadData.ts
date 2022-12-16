@@ -1,7 +1,10 @@
 import * as Bitten from 'npm:bitten';
 import { Buffer as NpmBuffer } from 'npm:buffer';
 
-import { isZlibbedFile } from './wesys-zlib.ts';
+import {
+    isZlibbedBuf,
+    unzlib,
+} from './wesys-zlib.ts';
 
 export default async function loadData(
     dbFilePath: string,
@@ -11,16 +14,14 @@ export default async function loadData(
     console.log(`Load data: ${dbFilePath}`);
 
     const file = await Deno.open(dbFilePath);
-
-    if (isZlibbedFile(file)) {
-        // TODO: Unzlib the file
-        throw new Error('TODO: Unzlib the file');
-    }
-
     const {size: fileSize} = await file.stat();
-    const buf = new Uint8Array(fileSize);
+    let buf = new Uint8Array(fileSize);
     await file.seek(0, Deno.SeekMode.Start);
     await file.read(buf);
+
+    if (isZlibbedBuf(buf)) {
+        buf = await unzlib(buf);
+    }
 
     const npmBuf = NpmBuffer.from(buf);
     const rawResult = Bitten.toJS(

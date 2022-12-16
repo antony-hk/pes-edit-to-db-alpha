@@ -5,10 +5,9 @@
 
 import * as SpecEditData2021PC from './spec/pes2021/edit/EditDataPC.mjs';
 import * as DbPlayerFormat from './spec/pes2021/pesdb/Player.ts';
-// import * as DbTacticsFormat from './spec/pes2021/pesdb/Tactics.mjs';
-// import * as DbTacticsFormationFormat from './spec/pes2021/pesdb/TacticsFormation.mjs';
+import * as DbTacticsFormat from './spec/pes2021/pesdb/Tactics.mjs';
+import * as DbTacticsFormationFormat from './spec/pes2021/pesdb/TacticsFormation.mjs';
 import loadData from './utils/loadData.ts';
-// import relativePath from './utils/relativePath.mjs';
 import relativePath from './utils/relativePath.ts';
 
 // const optionDefintiions = [
@@ -46,250 +45,26 @@ export default async function main(
     const editDataPath = `${tempDecryptedEditDirPath}/data.dat`;
     const {
         players: editedPlayers,
-        // tactics: editedTactics,
+        tactics: editedTactics,
         // ...others
     } = (await loadData(editDataPath, SpecEditData2021PC))[0];
 
     // console.log(editedPlayers);
 
     const players = await loadData(relativePath('./input/pesdb/Player.bin'), DbPlayerFormat);
+    const tacticses = await loadData(relativePath('./input/pesdb/Tactics.bin'), DbTacticsFormat);
+    const tacticsFormations = await loadData(relativePath('./input/pesdb/TacticsFormation.bin'), DbTacticsFormationFormat);
 
+    // Requirements:
+    // * Tactics
+    // * TacticsFormations
+    // * Players?
+    // * PlayerAssignments
+    
     console.log(players);
-    // const tacticses = loadData(relativePath('./input/pesdb/Tactics.bin'), DbTacticsFormat);
-    // const tacticsFormations = loadData(relativePath('./input/pesdb/TacticsFormation.bin'), DbTacticsFormationFormat);
-
-    // console.log(tacticses);
+    console.log(tacticses);
+    console.log(tacticsFormations);
     // let result;
 
     // result = await temp(editedTactics, { tacticses, tacticsFormations });
 }
-
-// (async function main() {
-//     const {
-//         edit: editFilePath,
-//         input: inputFilePath,
-//         output: outputFilePath,
-//     } = commandLineArgs(optionDefintiions);
-// })();
-
-
-// // import loadData from 'pes-ted/bin/common/loadData.mjs';
-// // import { relativePath } from 'pes-ted/bin/utils/fs-helper.mjs';
-
-// // const pesXdecrypterPath = relativePath('../others/pesXdecrypter_2021/decrypter21.exe');
-// // const customizedTacticsJsonPath = 'C:\\git\\pes-ted-data\\wehk\\pes2021\\EvoWebTactics.json';
-// // const customizedPlayerAssignmentJsonPath = 'C:\\git\\pes-ted-data\\wehk\\pes2021\\EvoWebPlayerAssignment.json';
-// // // ----------------------------------------------------------------------------
-// // const filePaths = [
-// //     'D:\\temp\\EvoWeb Patch 2021 3.0\\EDIT00000000', // 000
-// // ];
-// // // ----------------------------------------------------------------------------
-// // const tacticsMap = new Map();
-// // // ----------------------------------------------------------------------------
-// // const filterFns = [];
-// // filterFns[0] = (teamId) => {
-// //     return [
-// //         111,    // OMONOIA
-// //         199,    // LUDOGORETS
-// //         203,    // LECH POZNAŃ
-// //         325,    // HNK RIJEKA
-// //         368,    // ZORYA LUHANSK
-// //         1589,   // RAPID WIEN
-// //         1981,   // CRVENA ZVEZDA
-// //         2293,   // BORUSSIA DORTMUND
-// //         2297,   // VfL WOLFSBURG
-// //         2298,   // TSG HOFFENHEIM
-// //         2300,   // RB LEIPZIG
-// //         2301,   // BORUSSIA M'GLADBACH
-// //         2344,   // FC AUGSBURG
-// //         2345,   // CSKA SOFIA
-// //         2346,   // UNION BERLIN
-// //         2347,   // SC FREIBURG
-// //         2348,   // WERDER BREMEN
-// //         2349,   // HERTHA BSC
-// //         2350,   // FC SALZBURG
-// //         2351,   // MAINZ 05
-// //         2352,   // VfB STUTTGART
-// //         2353,   // FERENCVÁROS
-// //         2354,   // 1. FC KÖLN
-// //         2355,   // ARMINIA BIELEFELD
-// //         2356,   // EINTRACHT FRANKFURT
-// //         2382,   // MOLDE
-// //         4077,   // CFR CLUJ
-// //         4143,   // LASK LINZ
-// //         4240,   // QARABAG
-// //         4938,   // WOLFSBERGER AC
-// //         5127,   // DUNDALK
-// //         5225,   // SLOVAN LIBEREC
-// //         5301,   // MACCABI TEL AVIV
-// //         5346,   // HAPOEL BE'ER SHEVA
-
-// //         2357,   // WORLD ALL STARS
-// //     ].indexOf(teamId) !== -1;
-// // };
-
-// // for (let i = 0; i < filePaths.length; i++) {
-// //     const filePath = filePaths[i];
-
-// //     // Decrypt edit file
-// //     const encryptedEditFilePath = filePath;
-// //     const decryptedEditDirPath = `${filePath}_decrypt`;
-// //     mkdirp.sync(decryptedEditDirPath);
-
-// //     const editDataPath = `${decryptedEditDirPath}/data.dat`;
-
-// //     if (!fs.existsSync(editDataPath)) {
-// //         console.log(`"${pesXdecrypterPath}" "${encryptedEditFilePath}" "${decryptedEditDirPath}"`);
-// //         childProcess.execSync(`"${pesXdecrypterPath}" "${encryptedEditFilePath}" "${decryptedEditDirPath}"`);
-// //     }
-
-// //     const result = loadData(editDataPath, EditData2021PcFormat);
-// //     const {
-// //         playerAssignments,
-// //         tactics,
-// //         // teams,
-// //     } = result[0];
-
-// //     const filterFn = filterFns[i];
-
-// //     const playerAssignmentMap = new Map();
-
-// //     for (let ii = 0; ii < playerAssignments.length; ii++) {
-// //         const { teamId: typedTeamId } = playerAssignments[ii];
-// //         if (filterFn(typedTeamId)) {
-// //             playerAssignmentMap.set(typedTeamId, playerAssignments[ii]);
-// //         }
-// //     }
-
-// //     for (let ii = 0; ii < tactics.length; ii++) {
-// //         const tactic = tactics[ii];
-
-// //         if (!tactic) {
-// //             continue;   // eslint-disable-line no-continue
-// //         }
-
-// //         if (!filterFn(tactic.teamId)) {
-// //             continue;   // eslint-disable-line no-continue
-// //         }
-
-// //         const {
-// //             teamId: typedTeamId,
-// //             longFkTaker: longFkTakerIndex,
-// //             shortFkTaker: shortFkTakerIndex,
-// //             secondFkTaker: secondFkTakerIndex,
-// //             leftCkTaker: leftCkTakerIndex,
-// //             rightCkTaker: rightCkTakerIndex,
-// //             pkTaker: pkTakerIndex,
-// //             captain: captainIndex,
-// //             preset1Formations,
-// //             preset1Instructions,
-// //             preset1Settings,
-// //             // preset2Formations,
-// //             // preset2Instructions,
-// //             // preset2Settings,
-// //             // preset3Formations,
-// //             // preset3Instructions,
-// //             // preset3Settings,
-// //             playerOrders,
-// //         } = tactic;
-
-// //         // const actualTeamId = typedTeamId % 16384;
-
-// //         const {
-// //             playerIds: typedPlayerIds,
-// //             shirtNumbers,
-// //         } = playerAssignmentMap.get(typedTeamId);
-// //         const reorderedTypedPlayerIds = playerOrders.map((index) => {
-// //             return typedPlayerIds[index];
-// //         });
-// //         const reorderedShirtNumbers = playerOrders.map((index) => {
-// //             return shirtNumbers[index];
-// //         });
-
-// //         const longFkTakerPlayerId = typedPlayerIds[longFkTakerIndex];
-// //         const shortFkTakerPlayerId = typedPlayerIds[shortFkTakerIndex];
-// //         const secondFkTakerPlayerId = typedPlayerIds[secondFkTakerIndex];
-// //         const leftCkTakerPlayerId = typedPlayerIds[leftCkTakerIndex];
-// //         const rightCkTakerPlayerId = typedPlayerIds[rightCkTakerIndex];
-// //         const pkTakerPlayerId = typedPlayerIds[pkTakerIndex];
-// //         const captainPlayerId = typedPlayerIds[captainIndex];
-
-// //         const outputPlayerIds = [];
-// //         const outputShirtNumbers = [];
-
-// //         reorderedTypedPlayerIds.forEach((typedPlayerId, iii) => {
-// //             if (typedPlayerId) {
-// //                 outputPlayerIds.push(typedPlayerId);
-// //                 outputShirtNumbers.push(reorderedShirtNumbers[iii]);
-// //             }
-// //         });
-
-// //         const presets = [
-// //             {
-// //                 formations: preset1Formations,
-// //                 instruction: preset1Instructions,
-// //                 settings: preset1Settings,
-// //             },
-// //             // {
-// //             //     formations: preset2Formations,
-// //             //     instructions: preset2Instructions,
-// //             //     settings: preset2Settings,
-// //             // },
-// //             // {
-// //             //     formations: preset3Formations,
-// //             //     instructions: preset3Instructions,
-// //             //     settings: preset3Settings,
-// //             // },
-// //         ];
-
-// //         const outputFormationForTeam = [];
-
-// //         for (let t = 0; t < presets.length; t++) {
-// //             const preset = presets[t];
-// //             const {
-// //                 formations,
-// //                 instruction,
-// //                 settings,
-// //             } = preset;
-
-// //             const outputPositionForPreset = [];
-
-// //             for (let tt = 0; tt < 3; tt++) {
-// //                 const {
-// //                     positions,
-// //                     placements,
-// //                 } = formations[tt];
-
-// //                 outputPositionForPreset[tt] = [];
-
-// //                 for (let ttt = 0; ttt < 11; ttt++) {
-// //                     outputPositionForPreset[tt][ttt] = [positions[ttt], placements[ttt].x, placements[ttt].y];
-// //                 }
-// //                 outputPositionForPreset[tt] = JSON.stringify(outputPositionForPreset[tt]);
-// //             }
-
-// //             outputFormationForTeam.push({
-// //                 position: outputPositionForPreset,
-// //                 instruction: instruction,
-// //                 settings: settings,
-// //             });
-// //         }
-
-// //         tacticsMap.set(typedTeamId, {
-// //             playerIds: JSON.stringify(outputPlayerIds),
-// //             shirtNumbers: JSON.stringify(outputShirtNumbers),
-// //             longFkTakerPlayerId,
-// //             shortFkTakerPlayerId,
-// //             secondFkTakerPlayerId,
-// //             leftCkTakerPlayerId,
-// //             rightCkTakerPlayerId,
-// //             pkTakerPlayerId,
-// //             captainPlayerId,
-// //             formation: outputFormationForTeam,
-// //         });
-// //     }
-// // }
-
-// // // console.log(tacticsMap);
-
-// // fs.writeFileSync(customizedTacticsJsonPath, JSON.stringify(Array.from(tacticsMap), null, 2));
