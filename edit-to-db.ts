@@ -22,11 +22,13 @@ const pesXdecrypterPath = relativePath('./lib/pesXdecrypter_2021/decrypter21.exe
 const tempEncryptedEditFilePath = relativePath('./temp/EDIT00000000');
 const tempDecryptedEditDirPath = relativePath('./temp/EDIT00000000_decrypt');
 
-async function temp(editedTactics, { tacticses, tacticsFormations }) {
-    return {
-        tacticses, tacticsFormations
-    };
-}
+// https://stackoverflow.com/questions/39494689/is-it-possible-to-restrictnumber-to-a-certain-range/70307091#70307091
+type Opaque<name, T> = T & { _type: name };
+
+type PlayerId = Opaque<'PlayerId', number>;
+type TypedPlayerId = Opaque<'TypedPlayerId', number>;
+type TeamId = Opaque<'TeamId', number>;
+export type TypedTeamId = Opaque<'TypedTeamId', number>;
 
 export default async function main(
     editFilePath = relativePath('./input/EDIT00000000'),

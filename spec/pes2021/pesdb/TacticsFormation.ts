@@ -2,7 +2,7 @@ export const isFullyCovered = true;
 
 export const recordLength = 0x0C;
 
-export function sortFn(a, b) {
+export function sortFn(a: TacticsFormation, b: TacticsFormation) {
     if (a.tacticId !== b.tacticId) {
         // Ascending
         return (a.tacticId - b.tacticId);
@@ -15,8 +15,16 @@ export function sortFn(a, b) {
 
     // Ascending
     return (a.playerAssignmentOrderNumber - b.playerAssignmentOrderNumber);
-};
+}
 
+export type TacticsFormation = {
+    tacticId: number;   // TODO: Rename to `tacticsId`
+    positionRole: number;
+    xPos: number;
+    yPos: number;
+    playerAssignmentOrderNumber: number;
+    formationIndex: number;
+};
 export const format = [
     { key: 'tacticId',    startByte: 0x00, length: 4 },
     { key: 'positionRole', startByte: 0x04, length: 4 },

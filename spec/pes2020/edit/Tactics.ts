@@ -1,15 +1,37 @@
+import { TypedTeamId } from '../../../edit-to-db.ts';
+
 const PC_PRESET_LENGTH = 0xA0;
 
+type Placement = {
+    x: number;
+    y: number;
+};
 const placementFormat = [
     { key: 'x', startByte: 0x00, length: 1 },
     { key: 'y', startByte: 0x01, length: 1 },
 ];
 
+type PositionNumericalValue = number & { _type: 'PositionNumericalValue' };
+type Positioning = {
+    positions: PositionNumericalValue[];
+    placements: Placement[];
+};
 const formationFormat = [
     { key: 'positions', startByte: 0x00, length: 0x01, arrayLength: 11 },
     { key: 'placements', startByte: 0x0B, length: 0x02, arrayLength: 11, subFormat: placementFormat },
 ];
 
+type Instructions = {
+    '反攻/控球遊戲': number;
+    '長傳/短傳': number;
+    '側翼/中央': number;
+    '保持隊形/彈性': number;
+    '前線施壓/全體球員防守': number;
+    '防守中央/側翼': number;
+    '積極性/防守': number;
+    unk1: number;
+    unk2: number;
+};
 const instructionsFormat = [
     { key: '反攻/控球遊戲', startByte: 0x00, length: 1 },    // 6AD38B 00 (反攻) --> 01 (控球遊戲)
     { key: '長傳/短傳', startByte: 0x01, length: 1 },    // 6AD38C 01 (短傳) --> 00 (長傳)
@@ -22,13 +44,33 @@ const instructionsFormat = [
     { key: 'unk2', startByte: 0x08, length: 1 },
 ];
 
-const advInstructionFormat = [
-    { key: 'advInstruction', startByte: 0x00, length: 1 },
-    { key: 'unused1', startByte: 0x01, length: 3 },
-    { key: 'playerIndex',    startByte: 0x04, length: 1 },
-    { key: 'unused2', startByte: 0x05, length: 3 },
-];
+// type AdvanceInstructions = {
+//     advInstruction: number;
+//     unused1: number;
+//     playerIndex: number;
+//     unused2: number;
+// };
+// const advInstructionFormat = [
+//     { key: 'advInstruction', startByte: 0x00, length: 1 },
+//     { key: 'unused1', startByte: 0x01, length: 3 },
+//     { key: 'playerIndex',    startByte: 0x04, length: 1 },
+//     { key: 'unused2', startByte: 0x05, length: 3 },
+// ];
 
+type PresetSettings = {
+    支援: number;
+    unk3: number;
+    防線: number;
+    嚴密: number;
+    unk4: number;
+    unused1: number;
+    unused2: number;
+
+    manMarking1: number;
+    manMarking2: number;
+    manMarking3: number;
+    manMarking4: number;
+};
 const settingsFormat = [
     { key: '支援', startByte: 0x00, length: 1 },    // Correct
     { key: 'unk3', startByte: 0x01, length: 1 },
@@ -46,6 +88,45 @@ const settingsFormat = [
 
 export const recordLength = 0x274;
 export const isFullyCovered = false;
+export type Formation = {
+    teamId: TypedTeamId;
+
+    preset1Formations: Positioning;
+    preset1Instructions: Instructions;
+    // preset1AdvInstruction1: AdvanceInstructions;
+    // preset1AdvInstruction2: AdvanceInstructions;
+    // preset1AdvInstruction3: AdvanceInstructions;
+    // preset1AdvInstruction4: AdvanceInstructions;
+    preset1Settings: PresetSettings;
+
+    preset2Formations: Positioning;
+    preset2Instructions: Instructions;
+    // preset2AdvInstruction1: AdvanceInstructions;
+    // preset2AdvInstruction2: AdvanceInstructions;
+    // preset2AdvInstruction3: AdvanceInstructions;
+    // preset2AdvInstruction4: AdvanceInstructions;
+    preset2Settings: PresetSettings;
+
+    preset3Formations: Positioning;
+    preset3Instructions: Instructions;
+    // preset3AdvInstruction1: AdvanceInstructions;
+    // preset3AdvInstruction2: AdvanceInstructions;
+    // preset3AdvInstruction3: AdvanceInstructions;
+    // preset3AdvInstruction4: AdvanceInstructions;
+    preset3Settings: PresetSettings;
+
+    playerOrders: number[];
+    longFkTaker: number;
+    shortFkTaker: number;
+    secondFkTaker: number;
+    leftCkTaker: number;
+    rightCkTaker: number;
+    pkTaker: number;
+    playerAttacking1: number;
+    playerAttacking2: number;
+    playerAttacking3: number;
+    captain: number;
+};
 export const format = [
     { key: 'teamId',  startByte: 0x00, length: 4 },
 

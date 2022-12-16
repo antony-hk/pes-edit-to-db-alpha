@@ -1,3 +1,4 @@
+import { TypedTeamId } from '../../../edit-to-db.ts';
 import {
     offByOneFunc,
 } from '../../common.mjs';
@@ -6,10 +7,32 @@ export const isFullyCovered = true;
 
 export const recordLength = 0x0C;
 
-export function sortFn(a, b) {
+export function sortFn(a: Tactics, b: Tactics) {
     return (a.tacticId - b.tacticId);
-};
+}
 
+export type Tactics = {
+    tacticId: number;   // TODO: Rename to `tacticsId`
+    teamId: TypedTeamId;
+
+    compactness: number;
+    supportRange: number;
+    defensiveLine: number;
+    unknown1: number;
+
+    unknown2: number;
+    'attackingNumber?': number;
+    'defendingNumber?': number;
+
+    positioning: boolean;
+    strategyType: boolean;
+    attackingStyle: boolean;
+    pressuring: boolean;
+    containmentArea: boolean;
+    attackingArea: boolean;
+    defensiveStyle: boolean;
+    buildUp: boolean;
+};
 export const format = [
     { key: 'tacticId',       startByte: 0x00, length: 4 },
     { key: 'teamId',          startByte: 0x04, length: 4 },
