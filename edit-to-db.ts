@@ -37,9 +37,11 @@ export default async function main(
 
     // Decrypt edit file
     await Deno.mkdir(tempDecryptedEditDirPath, { recursive: true });
-    await Deno.run({
-        cmd: [pesXdecrypterPath, tempEncryptedEditFilePath, tempDecryptedEditDirPath]
-    });
+
+    // TODO: Rewrite the decrypt stuff to make it work on the OS other than Windows
+    // await Deno.run({
+    //     cmd: [pesXdecrypterPath, tempEncryptedEditFilePath, tempDecryptedEditDirPath]
+    // });
 
     const editDataPath = `${tempDecryptedEditDirPath}/data.dat`;
     const {
@@ -50,7 +52,9 @@ export default async function main(
 
     // console.log(editedPlayers);
 
-    const players = loadData(relativePath('./input/pesdb/Player.bin'), DbPlayerFormat);
+    const players = await loadData(relativePath('./input/pesdb/Player.bin'), DbPlayerFormat);
+
+    console.log(players);
     // const tacticses = loadData(relativePath('./input/pesdb/Tactics.bin'), DbTacticsFormat);
     // const tacticsFormations = loadData(relativePath('./input/pesdb/TacticsFormation.bin'), DbTacticsFormationFormat);
 

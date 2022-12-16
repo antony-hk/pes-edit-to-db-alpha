@@ -46,7 +46,7 @@ export default async function loadData(
         // }
     }
 
-    if (true || Format.isFullyCovered) {
+    if (Format.isFullyCovered) {
         const regenResult = Bitten.fromJS(result, Format.recordLength, Format.format, isBigEndian);
 
         if (npmBuf.compare(regenResult) !== 0) {
@@ -60,5 +60,5 @@ export default async function loadData(
         }
     }
 
-    return rawResult;
+    return result;
 }

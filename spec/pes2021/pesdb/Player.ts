@@ -150,6 +150,8 @@ const playingStyleFunc: DataGetAndSet<TPlayingStyle, TPlayingStyleKey> = {
     setter: (i: TPlayingStyleKey) => PlayingStyle[i],
 };
 
+export const recordLength = 0x138;
+
 export const format: Format = [
     // 0x00
     { key: 'careerStartTeamId', startByte: 0x00, length: 4 },
