@@ -18,11 +18,11 @@ export type Tactics = {
     compactness: number;
     supportRange: number;
     defensiveLine: number;
-    unknown1: number;
+    unknown1?: number;
 
-    unknown2: number;
-    'attackingNumber?': number;
-    'defendingNumber?': number;
+    unknown2?: number;
+    'attackingNumber?'?: number;
+    'defendingNumber?'?: number;
 
     positioning: boolean;
     strategyType: boolean;

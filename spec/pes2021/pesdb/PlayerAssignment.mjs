@@ -19,12 +19,12 @@ export const format = [
 
     { key: 'shirtNumber',  startByte: 0x0C, startBit: 0,  lengthInBit: 10, getter: shirtNumberGetter, setter: shirtNumberSetter },
     { key: 'orderNumber',  startByte: 0x0C, startBit: 10, lengthInBit: 6 },
-    { key: 'rightCkTaker', startByte: 0x0C, startBit: 16, lengthInBit: 1 },
-    { key: 'shortFkTaker', startByte: 0x0C, startBit: 17, lengthInBit: 1 },
-    { key: 'leftCkTaker',  startByte: 0x0C, startBit: 18, lengthInBit: 1 },
-    { key: 'longFkTaker',  startByte: 0x0C, startBit: 19, lengthInBit: 1 },
-    { key: 'pkTaker',      startByte: 0x0C, startBit: 20, lengthInBit: 1 },
-    { key: 'captain',      startByte: 0x0C, startBit: 21, lengthInBit: 1 },
+    { key: 'rightCkTaker', startByte: 0x0C, startBit: 16, lengthInBit: 1, getter: (i) => !!i, setter: (i) => i && 1 || 0 },
+    { key: 'shortFkTaker', startByte: 0x0C, startBit: 17, lengthInBit: 1, getter: (i) => !!i, setter: (i) => i && 1 || 0 },
+    { key: 'leftCkTaker',  startByte: 0x0C, startBit: 18, lengthInBit: 1, getter: (i) => !!i, setter: (i) => i && 1 || 0 },
+    { key: 'longFkTaker',  startByte: 0x0C, startBit: 19, lengthInBit: 1, getter: (i) => !!i, setter: (i) => i && 1 || 0 },
+    { key: 'pkTaker',      startByte: 0x0C, startBit: 20, lengthInBit: 1, getter: (i) => !!i, setter: (i) => i && 1 || 0 },
+    { key: 'captain',      startByte: 0x0C, startBit: 21, lengthInBit: 1, getter: (i) => !!i, setter: (i) => i && 1 || 0 },
     // { key: 'empty2',       startByte: 0x0C, startBit: 22, lengthInBit: 10 },
 ];
 

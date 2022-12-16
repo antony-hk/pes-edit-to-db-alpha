@@ -1,7 +1,7 @@
 // import path from 'path';
 
 export default function relativePath(input: string): string {
-    console.log(input);
+    console.log(`Relative path: ${input}`);
     return input;
 
     // if (input.slice(1,3) === ':\\') {
