@@ -5,6 +5,7 @@
 
 import * as SpecEditData2021PC from './spec/pes2021/edit/EditDataPC.mjs';
 import * as DbPlayerFormat from './spec/pes2021/pesdb/Player.ts';
+import * as DbPlayerAssignmentFormat from './spec/pes2021/pesdb/PlayerAssignment.mjs';
 import * as DbTacticsFormat from './spec/pes2021/pesdb/Tactics.mjs';
 import * as DbTacticsFormationFormat from './spec/pes2021/pesdb/TacticsFormation.mjs';
 import loadData from './utils/loadData.ts';
@@ -52,6 +53,7 @@ export default async function main(
     // console.log(editedPlayers);
 
     const players = await loadData(relativePath('./input/pesdb/Player.bin'), DbPlayerFormat);
+    const playerAssignments = await loadData(relativePath('./input/pesdb/PlayerAssignment.bin'), DbPlayerAssignmentFormat);
     const tacticses = await loadData(relativePath('./input/pesdb/Tactics.bin'), DbTacticsFormat);
     const tacticsFormations = await loadData(relativePath('./input/pesdb/TacticsFormation.bin'), DbTacticsFormationFormat);
 
@@ -62,6 +64,7 @@ export default async function main(
     // * PlayerAssignments
     
     console.log(players);
+    console.log(playerAssignments);
     console.log(tacticses);
     console.log(tacticsFormations);
     // let result;
