@@ -7,13 +7,13 @@ import {
 } from './wesys-zlib.ts';
 
 export default async function loadData(
-    dbFilePath: string,
+    filePath: string,
     Format: any,
     isBigEndian = false
 ) {
-    console.log(`Load data: ${dbFilePath}`);
+    console.log(`Load data: ${filePath}`);
 
-    const file = await Deno.open(dbFilePath);
+    const file = await Deno.open(filePath);
     const {size: fileSize} = await file.stat();
     let buf = new Uint8Array(fileSize);
     await file.seek(0, Deno.SeekMode.Start);
@@ -51,13 +51,13 @@ export default async function loadData(
         const regenResult = Bitten.fromJS(result, Format.recordLength, Format.format, isBigEndian);
 
         if (npmBuf.compare(regenResult) !== 0) {
-            const regenFilePath = `${dbFilePath}_regen`;
+            const regenFilePath = `${filePath}_regen`;
             console.warn([
                 `Warning: Format is not fully covered. A regenerated binary file "${regenFilePath}" is written for debugging.`,
                 `On Windows, you can run the following command to compare two binary files.`,
-                `   fc "${dbFilePath}" "${regenFilePath}" /b`   // TODO: The command maybe incorrect, need to be verified.
+                `   fc "${filePath}" "${regenFilePath}" /b`   // TODO: The command maybe incorrect, need to be verified.
             ].join('\n'));
-            await Deno.writeFile(`${dbFilePath}_regen`, regenResult);
+            await Deno.writeFile(`${filePath}_regen`, regenResult);
         }
     }
 

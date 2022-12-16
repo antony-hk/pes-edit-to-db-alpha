@@ -1,7 +1,7 @@
 // import childProcess from 'child_process';
 // import commandLineArgs from 'command-line-args';
 // import fs from 'fs';
-// import mkdirp from 'mkdirp';
+import mkdirp from 'npm:mkdirp';
 
 import * as SpecEditData2021PC from './spec/pes2021/edit/EditDataPC.mjs';
 import * as DbPlayerFormat from './spec/pes2021/pesdb/Player.ts';
@@ -9,6 +9,7 @@ import * as DbPlayerAssignmentFormat from './spec/pes2021/pesdb/PlayerAssignment
 import * as DbTacticsFormat from './spec/pes2021/pesdb/Tactics.mjs';
 import * as DbTacticsFormationFormat from './spec/pes2021/pesdb/TacticsFormation.mjs';
 import loadData from './utils/loadData.ts';
+import saveData from './utils/saveData.ts';
 import relativePath from './utils/relativePath.ts';
 
 // const optionDefintiions = [
@@ -45,29 +46,34 @@ export default async function main(
 
     const editDataPath = `${tempDecryptedEditDirPath}/data.dat`;
     const {
-        players: editedPlayers,
+        // players: editedPlayers,
         tactics: editedTactics,
         // ...others
     } = (await loadData(editDataPath, SpecEditData2021PC))[0];
 
-    // console.log(editedPlayers);
-
-    const players = await loadData(relativePath('./input/pesdb/Player.bin'), DbPlayerFormat);
+    // const players = await loadData(relativePath('./input/pesdb/Player.bin'), DbPlayerFormat);
     const playerAssignments = await loadData(relativePath('./input/pesdb/PlayerAssignment.bin'), DbPlayerAssignmentFormat);
     const tacticses = await loadData(relativePath('./input/pesdb/Tactics.bin'), DbTacticsFormat);
     const tacticsFormations = await loadData(relativePath('./input/pesdb/TacticsFormation.bin'), DbTacticsFormationFormat);
-
+    
     // Requirements:
     // * Tactics
     // * TacticsFormations
     // * Players?
     // * PlayerAssignments
     
-    console.log(players);
+    // console.log(players);
     console.log(playerAssignments);
     console.log(tacticses);
     console.log(tacticsFormations);
     // let result;
-
+    
     // result = await temp(editedTactics, { tacticses, tacticsFormations });
+    
+    mkdirp.sync(relativePath('./output/pesdb'));
+    // await saveData(relativePath('./output/pesdb/Player.bin'), DbPlayerFormat, players);
+    await saveData(relativePath('./output/pesdb/PlayerAssignment.bin'), DbPlayerAssignmentFormat, playerAssignments);
+    await saveData(relativePath('./output/pesdb/Tactics.bin'), DbTacticsFormat, tacticses);
+    await saveData(relativePath('./output/pesdb/TacticsFormation.bin'), DbTacticsFormationFormat, tacticsFormations);
+    
 }
