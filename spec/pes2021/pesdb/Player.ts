@@ -1,4 +1,4 @@
-import { createReverseMap } from './utils/createReverseMap.ts';
+import { createReverseMap } from '../../../utils/createReverseMap.ts';
 
 type DataGetAndSet<T, U> = {
     getter: (input: T) => U | undefined;
@@ -8,22 +8,109 @@ type DataGetAndSet<T, U> = {
 type DataRecordRow<T, U> = {
     key: string;
     startByte: number;
-    length: number;
+    startBit?: number;
+    lengthInBit?: number;
+    length?: number;
     isString?: boolean;
 } & Partial<DataGetAndSet<T, U>>;
 
-type Format = DataRecordRow<unknown, unknown>[];
+type Format = DataRecordRow<any, any>[];
 
-// Age
-const ageFunc: DataGetAndSet<number, number> = {
-    getter: (i: number) => i + 15,
-    setter: (i: number) => i - 15,
+type PositionRatingIngameValue = 'A' | 'B' | 'C' | 'B3';
+type LeftRightIngameValue = 'L' | 'R';
+type PositionIngameValue = 'GK' | 'CB' | 'LB' | 'RB' | 'DMF' | 'CMF' | 'LMF' | 'RMF' | 'AMF' | 'LWF' | 'RWF' | 'SS' | 'CF';
+
+const createNumberOffsetFunc = (offset: number): DataGetAndSet<number, number> => ({
+    getter: (i: number) => i + offset,
+    setter: (i: number) => i - offset,
+});
+
+const ageFunc = createNumberOffsetFunc(15);
+const heightFunc = createNumberOffsetFunc(100);
+const weightFunc = createNumberOffsetFunc(30);
+const offByOneFunc = createNumberOffsetFunc(1);
+const generalStatsFunc = createNumberOffsetFunc(40);
+
+const booleanFunc: DataGetAndSet<number, boolean> = {
+    getter: (i: number) => !!i,
+    setter: (i: boolean) => i && 1 || 0,
 };
 
-// Height
-const heightFunc: DataGetAndSet<number, number> = {
-    getter: (i: number) => i + 100,
-    setter: (i: number) => i - 100,
+const positionFunc: DataGetAndSet<number, PositionRatingIngameValue | number> = {
+    getter: (i: number) => {
+        switch (i) {
+            case 0:  return 'C';
+            case 1:  return 'B';
+            case 2:  return 'A';
+            case 3:  return 'B3';
+            default: return i;
+        }
+    },
+    setter: (i: PositionRatingIngameValue | number) => {
+        switch (i) {
+            case 'B3': return 3;
+            case 'A': return 2;
+            case 'B': return 1;
+            case 'C': return 0;
+            default:  return 0;
+        }
+    },
+}
+
+const leftRightFunc: DataGetAndSet<number, LeftRightIngameValue | number> = {
+    getter: function (input) {
+        switch (input) {
+            case 0:     return 'R';
+            case 1:     return 'L';
+            default:    return input;
+        }
+    },
+    setter: function (input) {
+        switch (input) {
+            case 'R':   return 0;
+            case 'L':   return 1;
+            default:    return input;
+        }
+    },
+};
+
+const registeredPositionFunc: DataGetAndSet<number, PositionIngameValue | number> = {
+    getter: (i) => {
+        switch (i) {
+            case 0:  return 'GK';
+            case 1:  return 'CB';
+            case 2:  return 'LB';
+            case 3:  return 'RB';
+            case 4:  return 'DMF';
+            case 5:  return 'CMF';
+            case 6:  return 'LMF';
+            case 7:  return 'RMF';
+            case 8:  return 'AMF';
+            case 9:  return 'LWF';
+            case 10: return 'RWF';
+            case 11: return 'SS';
+            case 12: return 'CF';
+            default: return i;
+        }
+    },
+    setter: (i) => {
+        switch (i) {
+            case 'GK':  return 0;
+            case 'CB':  return 1;
+            case 'LB':  return 2;
+            case 'RB':  return 3;
+            case 'DMF': return 4;
+            case 'CMF': return 5;
+            case 'LMF': return 6;
+            case 'RMF': return 7;
+            case 'AMF': return 8;
+            case 'LWF': return 9;
+            case 'RWF': return 10;
+            case 'SS':  return 11;
+            case 'CF':  return 12;
+            default: return 0;
+        }
+    },
 };
 
 // Playing Style
