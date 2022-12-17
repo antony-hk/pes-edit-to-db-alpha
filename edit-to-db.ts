@@ -234,18 +234,17 @@ async function applyFormationsToDb(
 
         playerIds.forEach((playerId, index) => {
             if (playerId) {
-                const playerOrderIndex = playerOrders.indexOf(index);
                 generatedDbPlayerAssignments.push({
                     entryId: maxInputDbPlayerAssignmentEntryId + index + 1,
                     playerId,
                     teamId,
                     shirtNumber: shirtNumbers[index],
-                    orderNumber: playerOrderIndex,
-                    rightCkTaker: playerOrderIndex === rightCkTakerIndex,
-                    leftCkTaker: playerOrderIndex === leftCkTakerIndex,
-                    longFkTaker: playerOrderIndex === longFkTakerIndex,
-                    pkTaker: playerOrderIndex === pkTakerIndex,
-                    captain: playerOrderIndex === captainIndex
+                    orderNumber: playerOrders.indexOf(index),
+                    rightCkTaker: index === rightCkTakerIndex,
+                    leftCkTaker: index === leftCkTakerIndex,
+                    longFkTaker: index === longFkTakerIndex,
+                    pkTaker: index === pkTakerIndex,
+                    captain: index === captainIndex
                 });
             }
         });
@@ -274,9 +273,10 @@ export default async function main(
     await Deno.mkdir(tempDecryptedEditDirPath, { recursive: true });
 
     // TODO: Rewrite the decrypt stuff to make it work on the OS other than Windows
-    await Deno.run({
+    const subprocess = Deno.run({
         cmd: [pesXdecrypterPath, tempEncryptedEditFilePath, tempDecryptedEditDirPath]
     });
+    await subprocess.status();
 
     console.time('Load files');
     const editDataPath = `${tempDecryptedEditDirPath}/data.dat`;
