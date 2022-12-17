@@ -1,6 +1,4 @@
-// import childProcess from 'child_process';
-// import commandLineArgs from 'command-line-args';
-// import fs from 'fs';
+import * as denoPath from "https://deno.land/std@0.168.0/path/mod.ts";
 import mkdirp from 'npm:mkdirp';
 
 import * as SpecEditData2021PC from './spec/pes2021/edit/EditDataPC.mjs';
@@ -20,15 +18,9 @@ import loadData from './utils/loadData.ts';
 import saveData from './utils/saveData.ts';
 import relativePath from './utils/relativePath.ts';
 
-// const optionDefintiions = [
-//     { name: 'edit', alias: 'e', type: String, defaultOption: true },
-//     { name: 'input', alias: 'i', type: String },
-//     { name: 'output', alias: 'o', type: String },
-// ];
-
-const pesXdecrypterPath = relativePath('./lib/pesXdecrypter_2021/decrypter21.exe');
-const tempEncryptedEditFilePath = relativePath('./temp/EDIT00000000');
-const tempDecryptedEditDirPath = relativePath('./temp/EDIT00000000_decrypt');
+const pesXdecrypterPath = relativePath('third_party', 'pesXdecrypter_2021', 'decrypter21.exe');
+const tempEncryptedEditFilePath = relativePath('temp', 'EDIT00000000');
+const tempDecryptedEditDirPath = relativePath('temp', 'EDIT00000000_decrypt');
 
 // https://stackoverflow.com/questions/39494689/is-it-possible-to-restrictnumber-to-a-certain-range/70307091#70307091
 type Opaque<name, T> = T & { _type: name };
@@ -90,7 +82,6 @@ function generateTacticsFromPreset(
         defensiveLine: settings['防線'],
         compactness: settings['嚴密'],
     };
-    // console.log(generatedTactics);
 
     const generatedTacticsFormations: TacticsFormation[] = [];
     for (let ii = 0 ; ii < 11; ii++) {
@@ -111,7 +102,7 @@ function generateTacticsFromPreset(
     }; 
 }
 
-async function applyFormationsToDb(
+function applyFormationsToDb(
     inputEditData: { playerAssignments: EditedPlayerAssignments, formations: EditedFormation[] },
     inputDbData: {
         playerAssignments: DbPlayerAssignment[],
@@ -180,7 +171,6 @@ async function applyFormationsToDb(
         const candidateTacticsIds = tacticsIdsToRemove.slice();
         for (let ii = candidateTacticsIds.length; ii < presets.length; ii++) {
             for (let candidate = 1; !candidateTacticsIds[ii]; candidate++) {
-                // console.log('hi', candidate);
                 if (!occupiedTacticsIdSet.has(candidate)) {
                     candidateTacticsIds[ii] = candidate;
                     occupiedTacticsIdSet.add(candidate);
@@ -262,9 +252,9 @@ async function applyFormationsToDb(
 }
 
 export default async function main(
-    editFilePath = relativePath('./input/EDIT00000000'),
-    // baseDbPath,
-    // outputDbPath
+    editFilePath = relativePath('sample_input/EDIT00000000'),
+    baseDbPath = relativePath('sample_input/pesdb'),
+    outputDbPath = relativePath('output/pesdb'),
 ) {
     // Copy edit file to temp
     await Deno.copyFile(editFilePath, tempEncryptedEditFilePath);
@@ -279,7 +269,7 @@ export default async function main(
     await subprocess.status();
 
     console.time('Load files');
-    const editDataPath = `${tempDecryptedEditDirPath}/data.dat`;
+    const editDataPath = denoPath.join(tempDecryptedEditDirPath, 'data.dat');
 
     const [
         [{ playerAssignments: editedPlayerAssignments, tactics: editedTactics }],
@@ -292,40 +282,23 @@ export default async function main(
             playerAssignments: EditedPlayerAssignments;
             tactics: EditedFormation[];
         }[]>,
-        // loadData(relativePath('./input/pesdb/Player.bin'), DbPlayerFormat),
-        loadData(relativePath('./input/pesdb/PlayerAssignment.bin'), DbPlayerAssignmentFormat),
-        loadData(relativePath('./input/pesdb/Tactics.bin'), DbTacticsFormat) as Promise<DbTacticses>,
-        loadData(relativePath('./input/pesdb/TacticsFormation.bin'), DbTacticsFormationFormat) as Promise<DbTacticsFormations>,
+        // loadData(relativePath(([baseDbPath, 'Player.bin']), DbPlayerFormat),
+        loadData(denoPath.join(baseDbPath, 'PlayerAssignment.bin'), DbPlayerAssignmentFormat),
+        loadData(denoPath.join(baseDbPath, 'Tactics.bin'), DbTacticsFormat) as Promise<DbTacticses>,
+        loadData(denoPath.join(baseDbPath, 'TacticsFormation.bin'), DbTacticsFormationFormat) as Promise<DbTacticsFormations>,
     ]);
     console.timeEnd('Load files');
 
-    // console.log(editedTactics);
-
-    const result = await applyFormationsToDb(
+    const result = applyFormationsToDb(
         { playerAssignments: editedPlayerAssignments, formations: editedTactics },
         { playerAssignments: playerAssignments, tacticses: tacticses, tacticsFormations: tacticsFormations }
     );
-
-    // Requirements:
-    // * Tactics
-    // * TacticsFormations
-    // * Players?
-    // * PlayerAssignments
     
-    // console.log(players);
-    // console.log(playerAssignments);
-    // console.log(tacticses);
-    // console.log(tacticsFormations);
-    // let result;
-    
-    // result = await temp(editedTactics, { tacticses, tacticsFormations });
-    
-    mkdirp.sync(relativePath('./output/pesdb'));
+    console.time('Save files');
+    mkdirp.sync(denoPath.join(outputDbPath));
     // await saveData(relativePath('./output/pesdb/Player.bin'), DbPlayerFormat, players);
-    console.time('Save PlayerAssignment.bin');
-    await saveData(relativePath('./output/pesdb/PlayerAssignment.bin'), DbPlayerAssignmentFormat, result.playerAssignments);
-    console.timeEnd('Save PlayerAssignment.bin');
-    await saveData(relativePath('./output/pesdb/Tactics.bin'), DbTacticsFormat, result.tacticses);
-    await saveData(relativePath('./output/pesdb/TacticsFormation.bin'), DbTacticsFormationFormat, result.tacticsFormations);
-    
+    await saveData(denoPath.join(outputDbPath, 'PlayerAssignment.bin'), DbPlayerAssignmentFormat, result.playerAssignments);
+    await saveData(denoPath.join(outputDbPath, 'Tactics.bin'), DbTacticsFormat, result.tacticses);
+    await saveData(denoPath.join(outputDbPath, 'TacticsFormation.bin'), DbTacticsFormationFormat, result.tacticsFormations);
+    console.timeEnd('Save files');
 }

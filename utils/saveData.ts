@@ -16,6 +16,7 @@ export default async function saveData(
 
     const bitten = Bitten.fromJS(data, Format.recordLength, Format.format, isBigEndian);
 
+    console.log(`Save file: ${filePath}`);
     if (shouldZlib) {
         await Deno.writeFile(filePath, zlib(bitten));
     } else {

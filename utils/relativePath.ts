@@ -1,13 +1,9 @@
-// import path from 'path';
+import { join } from "https://deno.land/std@0.168.0/path/mod.ts";
+import generate from "https://x.nest.land/denoname@0.8.2/mod.ts";
 
-export default function relativePath(input: string): string {
-    console.log(`Relative path: ${input}`);
-    return input;
+const { dirname } = generate(import.meta);
+const projectRoot = join(dirname, '..');
 
-    // if (input.slice(1,3) === ':\\') {
-    //     return input;
-    // }
-
-    // const __dirname = path.dirname(process.argv[1]);
-    // return path.join(__dirname, input);
+export default function relativePath(...input: string[]): string {
+    return join(projectRoot, ...input);
 }

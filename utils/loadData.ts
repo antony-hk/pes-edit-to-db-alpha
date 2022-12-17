@@ -11,7 +11,7 @@ export default async function loadData(
     Format: any,
     isBigEndian = false
 ) {
-    console.log(`Load data: ${filePath}`);
+    console.log(`Load file: ${filePath}`);
 
     const file = await Deno.open(filePath);
     const {size: fileSize} = await file.stat();

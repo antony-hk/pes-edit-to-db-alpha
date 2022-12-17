@@ -1,5 +1,5 @@
 /*
-   deno --unstable run --allow-env --allow-read --allow-write cli.ts
+   deno --unstable run --allow-env --allow-read --allow-run --allow-write cli.ts
 */
 import main from './edit-to-db.ts';
 
