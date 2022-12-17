@@ -256,6 +256,11 @@ export default async function main(
     baseDbPath = relativePath('sample_input/pesdb'),
     outputDbPath = relativePath('output/pesdb'),
 ) {
+    console.log({
+        editFilePath,
+        baseDbPath,
+        outputDbPath,
+    });
     // Copy edit file to temp
     await Deno.copyFile(editFilePath, tempEncryptedEditFilePath);
 
