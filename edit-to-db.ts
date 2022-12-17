@@ -46,6 +46,7 @@ type DbPlayerAssignment = {
     orderNumber: number;
     rightCkTaker: boolean;
     leftCkTaker: boolean;
+    shortFkTaker: boolean;
     longFkTaker: boolean;
     pkTaker: boolean;
     captain: boolean;
@@ -211,7 +212,7 @@ function applyFormationsToDb(
 
         const {
             longFkTaker: longFkTakerIndex,
-            // shortFkTaker: shortFkTakerIndex,
+            shortFkTaker: shortFkTakerIndex,
             // secondFkTaker: secondFkTakerIndex,
             leftCkTaker: leftCkTakerIndex,
             rightCkTaker: rightCkTakerIndex,
@@ -233,6 +234,7 @@ function applyFormationsToDb(
                     rightCkTaker: index === rightCkTakerIndex,
                     leftCkTaker: index === leftCkTakerIndex,
                     longFkTaker: index === longFkTakerIndex,
+                    shortFkTaker: index === shortFkTakerIndex,
                     pkTaker: index === pkTakerIndex,
                     captain: index === captainIndex
                 });
