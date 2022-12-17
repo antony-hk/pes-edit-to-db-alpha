@@ -11,8 +11,8 @@ const placementFormat = [
     { key: 'y', startByte: 0x01, length: 1 },
 ];
 
-type PositionNumericalValue = number & { _type: 'PositionNumericalValue' };
-type Positioning = {
+export type PositionNumericalValue = number & { _type: 'PositionNumericalValue' };
+export type Positioning = {
     positions: PositionNumericalValue[];
     placements: Placement[];
 };
@@ -21,7 +21,7 @@ const formationFormat = [
     { key: 'placements', startByte: 0x0B, length: 0x02, arrayLength: 11, subFormat: placementFormat },
 ];
 
-type Instructions = {
+export type Instructions = {
     '反攻/控球遊戲': number;
     '長傳/短傳': number;
     '側翼/中央': number;
@@ -57,7 +57,7 @@ const instructionsFormat = [
 //     { key: 'unused2', startByte: 0x05, length: 3 },
 // ];
 
-type PresetSettings = {
+export type PresetSettings = {
     支援: number;
     unk3: number;
     防線: number;
@@ -91,7 +91,7 @@ export const isFullyCovered = false;
 export type Formation = {
     teamId: TypedTeamId;
 
-    preset1Formations: Positioning;
+    preset1Formations: Positioning[];
     preset1Instructions: Instructions;
     // preset1AdvInstruction1: AdvanceInstructions;
     // preset1AdvInstruction2: AdvanceInstructions;
@@ -99,7 +99,7 @@ export type Formation = {
     // preset1AdvInstruction4: AdvanceInstructions;
     preset1Settings: PresetSettings;
 
-    preset2Formations: Positioning;
+    preset2Formations: Positioning[];
     preset2Instructions: Instructions;
     // preset2AdvInstruction1: AdvanceInstructions;
     // preset2AdvInstruction2: AdvanceInstructions;
@@ -107,7 +107,7 @@ export type Formation = {
     // preset2AdvInstruction4: AdvanceInstructions;
     preset2Settings: PresetSettings;
 
-    preset3Formations: Positioning;
+    preset3Formations: Positioning[];
     preset3Instructions: Instructions;
     // preset3AdvInstruction1: AdvanceInstructions;
     // preset3AdvInstruction2: AdvanceInstructions;

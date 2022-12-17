@@ -4,7 +4,12 @@
 import mkdirp from 'npm:mkdirp';
 
 import * as SpecEditData2021PC from './spec/pes2021/edit/EditDataPC.mjs';
-import { Formation as EditedFormation } from './spec/pes2020/edit/Tactics.ts';
+import {
+    Formation as EditedFormation,
+    Instructions,
+    Positioning,
+    PresetSettings
+} from './spec/pes2020/edit/Tactics.ts';
 // import * as DbPlayerFormat from './spec/pes2021/pesdb/Player.ts';
 import * as DbPlayerAssignmentFormat from './spec/pes2021/pesdb/PlayerAssignment.mjs';
 import * as DbTacticsFormat from './spec/pes2021/pesdb/Tactics.ts';
@@ -41,8 +46,6 @@ type EditedPlayerAssignment = {
 };
 type EditedPlayerAssignments = EditedPlayerAssignment[];
 
-type EditedFormations = EditedFormation[];
-
 type DbPlayerAssignment = {
     entryId: number;
     playerId: TypedPlayerId;
@@ -55,11 +58,61 @@ type DbPlayerAssignment = {
     pkTaker: boolean;
     captain: boolean;
 };
-type DbTacticses = Record<string, any>;
-type DbTacticsFormations = Record<string, any>;
+type DbTacticses = Tactics[];
+type DbTacticsFormations = TacticsFormation[];
+
+function generateTacticsFromPreset(
+    teamId: TypedTeamId,
+    targetTacticsId: number,
+    preset: {
+        positioning: Positioning[];
+        instructions: Instructions;
+        settings: PresetSettings;
+    }
+) {
+    const { positioning, instructions, settings } = preset;
+
+    const generatedTactics: Tactics = {
+        tacticId: targetTacticsId,
+        teamId,
+
+        strategyType: false,    // TODO: Missing in edit
+
+        attackingStyle: !!instructions['反攻/控球遊戲'],
+        buildUp: !!instructions['長傳/短傳'],
+        attackingArea: !!instructions['側翼/中央'],
+        positioning: !!instructions['保持隊形/彈性'],
+        defensiveStyle: !!instructions['前線施壓/全體球員防守'],
+        containmentArea: !!instructions['防守中央/側翼'],
+        pressuring: !!instructions['積極性/防守'],
+
+        supportRange: settings['支援'],
+        defensiveLine: settings['防線'],
+        compactness: settings['嚴密'],
+    };
+    // console.log(generatedTactics);
+
+    const generatedTacticsFormations: TacticsFormation[] = [];
+    for (let ii = 0 ; ii < 11; ii++) {
+        const generatedTacticsFormation: TacticsFormation = {
+            tacticId: targetTacticsId,
+            positionRole: positioning[0].positions[ii],
+            xPos: positioning[0].placements[ii].x,
+            yPos: positioning[0].placements[ii].y,
+            formationIndex: 0,
+            playerAssignmentOrderNumber: ii
+        };
+        generatedTacticsFormations.push(generatedTacticsFormation);
+    }
+
+    return {
+        tactics: generatedTactics,
+        tacticsFormations: generatedTacticsFormations,
+    }; 
+}
 
 async function applyFormationsToDb(
-    inputEditData: { playerAssignments: EditedPlayerAssignments, formations: EditedFormations },
+    inputEditData: { playerAssignments: EditedPlayerAssignments, formations: EditedFormation[] },
     inputDbData: {
         playerAssignments: DbPlayerAssignment[],
         tacticses: DbTacticses,
@@ -67,42 +120,16 @@ async function applyFormationsToDb(
     },
 ) {
     const { formations, playerAssignments: editedPlayerAssignments } = inputEditData;
-    const { playerAssignments: dbPlayerAssignments } = inputDbData;
-    // console.log(formations);
+    let {
+        playerAssignments: dbPlayerAssignments,
+        tacticses,
+        tacticsFormations,
+    } = inputDbData;
 
-    const editedPlayerAssignmentMap = new Map<TypedTeamId, EditedPlayerAssignment>();
-    const generatedDbPlayerAssignments: DbPlayerAssignment[] = [];
-    const maxInputDbPlayerAssignmentEntryId = Math.max(...dbPlayerAssignments.map(r => r.entryId));
+    const occupiedTacticsIdSet = new Set<number>();
+    const formationsMap = new Map<TypedTeamId, EditedFormation>();
 
-    for (let i = 0; i < editedPlayerAssignments.length; i++) {
-        const record = editedPlayerAssignments[i];
-        const {
-            playerIds,
-            shirtNumbers,
-            teamId, 
-        } = record;
-
-        if (teamId !== 262143) {
-            editedPlayerAssignmentMap.set(teamId, record);
-
-            playerIds.forEach((playerId, index) => {
-                if (playerId) {
-                    generatedDbPlayerAssignments.push({
-                        entryId: maxInputDbPlayerAssignmentEntryId+index+1,
-                        playerId,
-                        teamId,
-                        shirtNumber: shirtNumbers[index],
-                        orderNumber: 0,
-                        rightCkTaker: false,
-                        leftCkTaker: false,
-                        longFkTaker: false,
-                        pkTaker: false,
-                        captain: false
-                    });
-                }
-            })
-        }
-    }
+    tacticses.forEach(t => occupiedTacticsIdSet.add(t.tacticId));
 
     for (let i = 0; i < formations.length; i++) {
         const formation = formations[i];
@@ -113,13 +140,6 @@ async function applyFormationsToDb(
         
         const {
             teamId: typedTeamId,
-            longFkTaker: longFkTakerIndex,
-            shortFkTaker: shortFkTakerIndex,
-            secondFkTaker: secondFkTakerIndex,
-            leftCkTaker: leftCkTakerIndex,
-            rightCkTaker: rightCkTakerIndex,
-            pkTaker: pkTakerIndex,
-            captain: captainIndex,
             preset1Formations,
             preset1Instructions,
             preset1Settings,
@@ -129,8 +149,14 @@ async function applyFormationsToDb(
             preset3Formations,
             preset3Instructions,
             preset3Settings,
-            playerOrders,
         } = formation;
+
+        formationsMap.set(typedTeamId, formation);
+
+        // Remove original tactics for the team
+        const tacticsIdsToRemove = tacticses.filter(dbt => dbt.teamId === typedTeamId).map(dbt => dbt.tacticId);
+        tacticses = tacticses.filter(tactics => tactics.teamId !== typedTeamId);
+        tacticsFormations = tacticsFormations.filter(tf => tacticsIdsToRemove.indexOf(tf.tacticId) === -1);
 
         const presets = [
             {
@@ -150,65 +176,96 @@ async function applyFormationsToDb(
             },
         ];
 
-        presets.forEach(({ positioning, instructions, settings }) => {
-            const generatedTactics: Tactics = {
-                tacticId: NaN,  // TODO
-                teamId: typedTeamId,
-    
-                strategyType: false,    // TODO: Missing in edit
-    
-                attackingStyle: !!instructions['反攻/控球遊戲'],
-                buildUp: !!instructions['長傳/短傳'],
-                attackingArea: !!instructions['側翼/中央'],
-                positioning: !!instructions['保持隊形/彈性'],
-                defensiveStyle: !!instructions['前線施壓/全體球員防守'],
-                containmentArea: !!instructions['防守中央/側翼'],
-                pressuring: !!instructions['積極性/防守'],
-    
-                supportRange: settings['支援'],
-                defensiveLine: settings['防線'],
-                compactness: settings['嚴密'],
-            };
-            console.log(generatedTactics);
+        // Fill tacticsIds
+        const candidateTacticsIds = tacticsIdsToRemove.slice();
+        for (let ii = candidateTacticsIds.length; ii < presets.length; ii++) {
+            for (let candidate = 1; !candidateTacticsIds[ii]; candidate++) {
+                // console.log('hi', candidate);
+                if (!occupiedTacticsIdSet.has(candidate)) {
+                    candidateTacticsIds[ii] = candidate;
+                    occupiedTacticsIdSet.add(candidate);
+                }
+            }
+        }
 
-            for (let ii = 0 ; ii < 11; ii++) {
-                const generatedTacticsFormation: TacticsFormation = {
-                    tacticId: NaN,  // TODO
-                    positionRole: positioning.positions[ii],
-                    xPos: positioning.placements[ii].x,
-                    yPos: positioning.placements[ii].y,
-                    formationIndex: 0,
-                    playerAssignmentOrderNumber: ii
-                };
-                console.log(generatedTacticsFormation);
+        presets.forEach((preset, presetIndex) => {
+            const {
+                tactics: generatedTactics,
+                tacticsFormations: generatedTacticsFormations
+            } = generateTacticsFromPreset(
+                typedTeamId,
+                candidateTacticsIds[presetIndex],
+                preset
+            );
+
+            tacticses.push(generatedTactics);
+            tacticsFormations.push(...generatedTacticsFormations);
+        });
+    }
+
+    // const editedPlayerAssignmentMap = new Map<TypedTeamId, EditedPlayerAssignment>();
+    const generatedDbPlayerAssignments: DbPlayerAssignment[] = [];
+    const maxInputDbPlayerAssignmentEntryId = Math.max(...dbPlayerAssignments.map(r => r.entryId));
+
+    for (let i = 0; i < editedPlayerAssignments.length; i++) {
+        const record = editedPlayerAssignments[i];
+        const {
+            playerIds,
+            shirtNumbers,
+            teamId, 
+        } = record;
+
+        if (teamId === 262143) {
+            continue;
+        }
+
+        const {
+            longFkTaker: longFkTakerIndex,
+            // shortFkTaker: shortFkTakerIndex,
+            // secondFkTaker: secondFkTakerIndex,
+            leftCkTaker: leftCkTakerIndex,
+            rightCkTaker: rightCkTakerIndex,
+            pkTaker: pkTakerIndex,
+            captain: captainIndex,
+            playerOrders,
+        } = formationsMap.get(teamId)!;
+
+        // editedPlayerAssignmentMap.set(teamId, record);
+
+        playerIds.forEach((playerId, index) => {
+            if (playerId) {
+                const playerOrderIndex = playerOrders.indexOf(index);
+                generatedDbPlayerAssignments.push({
+                    entryId: maxInputDbPlayerAssignmentEntryId + index + 1,
+                    playerId,
+                    teamId,
+                    shirtNumber: shirtNumbers[index],
+                    orderNumber: playerOrderIndex,
+                    rightCkTaker: playerOrderIndex === rightCkTakerIndex,
+                    leftCkTaker: playerOrderIndex === leftCkTakerIndex,
+                    longFkTaker: playerOrderIndex === longFkTakerIndex,
+                    pkTaker: playerOrderIndex === pkTakerIndex,
+                    captain: playerOrderIndex === captainIndex
+                });
             }
         });
 
-        // const {
-        //     playerIds: typedPlayerIds,
-        //     shirtNumbers,
-        // } = editedPlayerAssignmentMap.get(typedTeamId)!;
-        // const reorderedTypedPlayerIds = playerOrders.map((index) => {
-        //     return typedPlayerIds[index];
-        // });
-        // const reorderedShirtNumbers = playerOrders.map((index) => {
-        //     return shirtNumbers[index];
-        // });
-
-        // const longFkTakerPlayerId = typedPlayerIds[longFkTakerIndex];
-        // const shortFkTakerPlayerId = typedPlayerIds[shortFkTakerIndex];
-        // const secondFkTakerPlayerId = typedPlayerIds[secondFkTakerIndex];
-        // const leftCkTakerPlayerId = typedPlayerIds[leftCkTakerIndex];
-        // const rightCkTakerPlayerId = typedPlayerIds[rightCkTakerIndex];
-        // const pkTakerPlayerId = typedPlayerIds[pkTakerIndex];
-        // const captainPlayerId = typedPlayerIds[captainIndex];
+        // dbPlayerAssignments = dbPlayerAssignments.filter((dbpa) => dbpa.teamId !== teamId);
     }
+
+    // dbPlayerAssignments.push(...generatedDbPlayerAssignments);
+
+    return {
+        playerAssignments: generatedDbPlayerAssignments,
+        tacticses,
+        tacticsFormations,
+    };
 }
 
 export default async function main(
     editFilePath = relativePath('./input/EDIT00000000'),
-    baseDbPath,
-    outputDbPath
+    // baseDbPath,
+    // outputDbPath
 ) {
     // Copy edit file to temp
     await Deno.copyFile(editFilePath, tempEncryptedEditFilePath);
@@ -217,9 +274,9 @@ export default async function main(
     await Deno.mkdir(tempDecryptedEditDirPath, { recursive: true });
 
     // TODO: Rewrite the decrypt stuff to make it work on the OS other than Windows
-    // await Deno.run({
-    //     cmd: [pesXdecrypterPath, tempEncryptedEditFilePath, tempDecryptedEditDirPath]
-    // });
+    await Deno.run({
+        cmd: [pesXdecrypterPath, tempEncryptedEditFilePath, tempDecryptedEditDirPath]
+    });
 
     console.time('Load files');
     const editDataPath = `${tempDecryptedEditDirPath}/data.dat`;
@@ -233,7 +290,7 @@ export default async function main(
     ] = await Promise.all([
         loadData(editDataPath, SpecEditData2021PC) as Promise<{
             playerAssignments: EditedPlayerAssignments;
-            tactics: EditedFormations;
+            tactics: EditedFormation[];
         }[]>,
         // loadData(relativePath('./input/pesdb/Player.bin'), DbPlayerFormat),
         loadData(relativePath('./input/pesdb/PlayerAssignment.bin'), DbPlayerAssignmentFormat),
@@ -242,9 +299,9 @@ export default async function main(
     ]);
     console.timeEnd('Load files');
 
-    console.log(editedTactics);
+    // console.log(editedTactics);
 
-    applyFormationsToDb(
+    const result = await applyFormationsToDb(
         { playerAssignments: editedPlayerAssignments, formations: editedTactics },
         { playerAssignments: playerAssignments, tacticses: tacticses, tacticsFormations: tacticsFormations }
     );
@@ -265,8 +322,10 @@ export default async function main(
     
     mkdirp.sync(relativePath('./output/pesdb'));
     // await saveData(relativePath('./output/pesdb/Player.bin'), DbPlayerFormat, players);
-    await saveData(relativePath('./output/pesdb/PlayerAssignment.bin'), DbPlayerAssignmentFormat, playerAssignments);
-    await saveData(relativePath('./output/pesdb/Tactics.bin'), DbTacticsFormat, tacticses);
-    await saveData(relativePath('./output/pesdb/TacticsFormation.bin'), DbTacticsFormationFormat, tacticsFormations);
+    console.time('Save PlayerAssignment.bin');
+    await saveData(relativePath('./output/pesdb/PlayerAssignment.bin'), DbPlayerAssignmentFormat, result.playerAssignments);
+    console.timeEnd('Save PlayerAssignment.bin');
+    await saveData(relativePath('./output/pesdb/Tactics.bin'), DbTacticsFormat, result.tacticses);
+    await saveData(relativePath('./output/pesdb/TacticsFormation.bin'), DbTacticsFormationFormat, result.tacticsFormations);
     
 }
