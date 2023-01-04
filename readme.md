@@ -1,54 +1,10 @@
-# node-cli-boilerplate
+# pes-edit-to-db-alpha
 
-> Boilerplate to kickstart creating a Node.js command-line tool
+`pes-edit-to-db-alpha` is a prototype of a tool merging the Edit Data (`EDIT00000000`) back into the `pesdb` binary files for "eFootball PES 2021 SEASON UPDATE".
 
-This is what I use for [my own command-line tools](https://www.npmjs.com/~sindresorhus).
-
-Also check out [`node-module-boilerplate`](https://github.com/sindresorhus/node-module-boilerplate).
-
-## Getting started
-
-**Click the "Use this template" button.**
-
-Alternatively, create a new directory and then run:
-
+## How to use
+1. Clone the code
+2. Run the following command in your shell / common prompt
 ```
-$ curl -fsSL https://github.com/sindresorhus/node-cli-boilerplate/archive/main.tar.gz | tar -xz --strip-components=1
-```
-
-There's also a [Yeoman generator](https://github.com/sindresorhus/generator-nm).
-
-
----
-
-**Remove everything from here and above**
-
----
-
-# unicorn-fun-cli
-
-> My awesome command-line tool
-
-## Install
-
-```
-$ npm install --global unicorn-fun-cli
-```
-
-## Usage
-
-```
-$ unicorn-fun --help
-
-  Usage
-    $ unicorn-fun [input]
-
-  Options
-    --postfix  Lorem ipsum  [Default: rainbows]
-
-  Examples
-    $ cli-name
-    unicorns & rainbows
-    $ cli-name ponies
-    ponies & rainbows
+deno --unstable run --allow-env --allow-read --allow-run --allow-write cli.ts
 ```
