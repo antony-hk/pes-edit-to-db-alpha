@@ -70,6 +70,8 @@ export type PresetSettings = {
     manMarking2: number;
     manMarking3: number;
     manMarking4: number;
+
+    isFluidFormationEnabled: boolean;
 };
 const settingsFormat = [
     { key: '支援', startByte: 0x00, length: 1 },    // Correct
@@ -84,6 +86,8 @@ const settingsFormat = [
     { key: 'manMarking2', startByte: 0x0D, length: 1 },
     { key: 'manMarking3', startByte: 0x0E, length: 1 },
     { key: 'manMarking4', startByte: 0x0F, length: 1 },
+
+    { key: 'isFluidFormationEnabled', startByte: 0x10, length: 1, getter: (i) => !!i, setter: (i) => i && 1 || 0 },
 ];
 
 export const recordLength = 0x274;

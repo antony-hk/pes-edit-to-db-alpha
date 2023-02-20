@@ -18,6 +18,8 @@ import loadData from './utils/loadData.ts';
 import saveData from './utils/saveData.ts';
 import relativePath from './utils/relativePath.ts';
 
+const SKIP_DISABLED_FLUID_FORMATIONS = false;
+
 const pesXdecrypterPath = relativePath('third_party', 'pesXdecrypter_2021', 'decrypter21.exe');
 const tempEncryptedEditFilePath = relativePath('temp', 'EDIT00000000');
 const tempDecryptedEditDirPath = relativePath('temp', 'EDIT00000000_decrypt');
@@ -57,6 +59,7 @@ type DbTacticsFormations = TacticsFormation[];
 function generateTacticsFromPreset(
     teamId: TypedTeamId,
     targetTacticsId: number,
+    strategyType: 0 | 1,
     preset: {
         positioning: Positioning[];
         instructions: Instructions;
@@ -68,8 +71,7 @@ function generateTacticsFromPreset(
     const generatedTactics: Tactics = {
         tacticId: targetTacticsId,
         teamId,
-
-        strategyType: false,    // TODO: Missing in edit
+        strategyType: strategyType,
 
         attackingStyle: !!instructions['反攻/控球遊戲'],
         buildUp: !!instructions['長傳/短傳'],
@@ -84,17 +86,32 @@ function generateTacticsFromPreset(
         compactness: settings['嚴密'],
     };
 
+    let allFormationsSame = true;
+    for (let i = 0; i < 11 && allFormationsSame; i++) {
+        allFormationsSame = 
+            (positioning[0].placements[i].x === positioning[1].placements[i].x) &&
+            (positioning[1].placements[i].x === positioning[2].placements[i].x) &&
+            (positioning[0].placements[i].y === positioning[1].placements[i].y) &&
+            (positioning[1].placements[i].y === positioning[2].placements[i].y);
+    }
+    const numNeededFormations = (
+        allFormationsSame ||
+        (!settings.isFluidFormationEnabled && SKIP_DISABLED_FLUID_FORMATIONS)
+    ) ? 1 : 3;
+
     const generatedTacticsFormations: TacticsFormation[] = [];
-    for (let ii = 0 ; ii < 11; ii++) {
-        const generatedTacticsFormation: TacticsFormation = {
-            tacticId: targetTacticsId,
-            positionRole: positioning[0].positions[ii],
-            xPos: positioning[0].placements[ii].x,
-            yPos: positioning[0].placements[ii].y,
-            formationIndex: 0,
-            playerAssignmentOrderNumber: ii
-        };
-        generatedTacticsFormations.push(generatedTacticsFormation);
+    for (let i = 0; i < numNeededFormations; i++) {
+        for (let j = 0 ; j < 11; j++) {
+            const generatedTacticsFormation: TacticsFormation = {
+                tacticId: targetTacticsId,
+                positionRole: positioning[i].positions[j],
+                xPos: positioning[i].placements[j].x,
+                yPos: positioning[i].placements[j].y,
+                formationIndex: i,
+                playerAssignmentOrderNumber: j,
+            };
+            generatedTacticsFormations.push(generatedTacticsFormation);
+        }
     }
 
     return {
@@ -168,9 +185,9 @@ function applyFormationsToDb(
             },
         ];
 
-        // Fill tacticsIds
+        const numDbAllowedPresets = 2;
         const candidateTacticsIds = tacticsIdsToRemove.slice();
-        for (let ii = candidateTacticsIds.length; ii < presets.length; ii++) {
+        for (let ii = candidateTacticsIds.length; ii < numDbAllowedPresets; ii++) {
             for (let candidate = 1; !candidateTacticsIds[ii]; candidate++) {
                 if (!occupiedTacticsIdSet.has(candidate)) {
                     candidateTacticsIds[ii] = candidate;
@@ -180,12 +197,17 @@ function applyFormationsToDb(
         }
 
         presets.forEach((preset, presetIndex) => {
+            if (presetIndex >= numDbAllowedPresets) {
+                return;
+            }
+
             const {
                 tactics: generatedTactics,
                 tacticsFormations: generatedTacticsFormations
             } = generateTacticsFromPreset(
                 typedTeamId,
                 candidateTacticsIds[presetIndex],
+                (presetIndex === 0) ? 0 : 1,
                 preset
             );
 

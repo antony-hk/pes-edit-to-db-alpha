@@ -25,7 +25,7 @@ export type Tactics = {
     'defendingNumber?'?: number;
 
     positioning: boolean;
-    strategyType: boolean;
+    strategyType: 0 | 1;
     attackingStyle: boolean;
     pressuring: boolean;
     containmentArea: boolean;
@@ -71,4 +71,6 @@ export const format = [
 
     // 1 bit - Build Up (0: Long Pass, 1: Short Pass)
     { key: 'buildUp',           startByte: 0x08, startBit: 30, lengthInBit: 1 },
+
+    { key: 'remainingUnknown',  startByte: 0x08, startBit: 31, lengthInBit: 1 },
 ];
